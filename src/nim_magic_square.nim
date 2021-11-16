@@ -2,9 +2,9 @@
 
 import math, opengl, pixie, staticglfw
 
-let
-  w: int32 = 256
-  h: int32 = 256
+const
+  w: int32 = 500
+  h: int32 = 500
 
 var
   screen = newImage(w, h)
@@ -15,30 +15,11 @@ var
 proc display =
   ## Called every frame by main while loop
 
-  # draw shiny sphere on gradient background
-  let linerGradient = newPaint(pkGradientLinear)
-  linerGradient.gradientHandlePositions.add(vec2(0, 0))
-  linerGradient.gradientHandlePositions.add(vec2(0, 256))
-  linerGradient.gradientStops.add(
-    ColorStop(color: color(0, 0, 0, 1), position: 0))
-  linerGradient.gradientStops.add(
-    ColorStop(color: color(1, 1, 1, 1), position: 1))
-  ctx.fillStyle = linerGradient
-  ctx.fillRect(0, 0, 256, 256)
+  ctx.fillStyle = rgba(255, 0, 0, 255)
+  ctx.fillRect(w / 2 - 50, h / 2 - 50, 100, 100)
 
-  let radialGradient = newPaint(pkGradientRadial)
-  radialGradient.gradientHandlePositions.add(vec2(128, 128))
-  radialGradient.gradientHandlePositions.add(vec2(256, 128))
-  radialGradient.gradientHandlePositions.add(vec2(128, 256))
-  radialGradient.gradientStops.add(
-    ColorStop(color: color(1, 1, 1, 1), position: 0))
-  radialGradient.gradientStops.add(
-    ColorStop(color: color(0, 0, 0, 1), position: 1))
-  ctx.fillStyle = radialGradient
-  ctx.fillCircle(circle(
-    vec2(128.0, 128.0 + sin(float32(frameCount)/10.0) * 20),
-    76.8
-  ))
+  ctx.fillStyle = rgba(0, 100, 255, 255)
+  ctx.fillRect(w / 2 - 50, h / 2 - 50 + 100, 100, 100)
 
   # update texture with new pixels from surface
   var dataPtr = ctx.image.data[0].addr
