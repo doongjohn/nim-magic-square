@@ -1,16 +1,19 @@
-# import std/math
-import staticglfw
-import opengl
+import std/math
 import vmath
 import chroma
+import staticglfw
+import glfwutils
+import opengl
 import pixie
-import display
+import app
 
 
-const white = parseHex "ffffff"
-const color1 = parseHex "bfdbff"
-const color2 = parseHex "ededed"
+const
+  white = parseHex "ffffff"
+  color1 = parseHex "bfdbff"
+  color2 = parseHex "ededed"
 
+# load font from the windows font directory
 var font = readFont("C:/Windows/Fonts/consola.ttf")
 font.size = 30
 
@@ -19,55 +22,62 @@ type Tile = object
   color: Color
   data: string
 
-const grid = [
+var grid = [
   [Tile(color: color1), Tile(color: color2), Tile(color: color1)],
   [Tile(color: color2), Tile(color: color1), Tile(color: color2)],
   [Tile(color: color1), Tile(color: color2), Tile(color: color1)],
 ]
 
 
-proc getCursorPos: Vec2 =
-  var x, y: cdouble
-  window.getCursorPos(x.addr, y.addr)
-  result.x = x
-  result.y = y
+proc isInGridBound(gridPos: IVec2): bool =
+  gridPos.x >= 0 and
+  gridPos.y >= 0 and
+  gridPos.x < 3 and
+  gridPos.y < 3
 
 
-discard setMouseButtonCallback(window, proc(window: Window, button: cint, action: cint, modifiers: cint) {.cdecl.} =
-  if button == MOUSE_BUTTON_RIGHT:
-    stdout.write "RMB "
-    case action
-    of PRESS: echo "down"
-    of RELEASE: echo "up"
-    else: discard
-  if button == MOUSE_BUTTON_LEFT:
-    stdout.write "LMB "
-    case action
-    of PRESS:
-      echo "down"
-      let mousePos = getCursorPos()
-      echo mousePos
-    of RELEASE: echo "up"
-    else: discard
+proc screenToGirdPos(screenPos: Vec2): IVec2 =
+  result.x = ((center.x - 150 - screenPos.x) / -100).floor.int32
+  result.y = ((center.y - 150 - screenPos.y) / -100).floor.int32
+
+
+iterator gridItor: tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
+  # gpos => grid pos
+  # spos => screen pos
+  var s = vec2(center.x - 100, center.y - 100)
+  for y, row in grid:
+    for x, tile in row:
+      yield (ivec2(x, y), vec2(s.x, s.y), tile)
+      s.x += 100
+    s.x = center.x - 100
+    s.y += 100
+
+
+discard setMouseButtonCallback(window,
+  proc(window: Window, button: cint, action: cint, modifiers: cint) {.cdecl.} =
+    if button == MOUSE_BUTTON_LEFT:
+      case action
+      of PRESS:
+        let gridPos = screenToGirdPos(window.getCursorPos())
+        echo gridPos
+        if gridPos.isInGridBound:
+          grid[gridPos.y][gridPos.x].data = "1"
+      of RELEASE:
+        discard
+      else: discard
 )
 
 
-proc drawTile(x, y: float) =
-  drawRect x, y, 100.0, 100.0
-
-
-main:
+template clearScreen =
   ctx.fillStyle = white
   drawRect center.x, center.y, screenSize.w.float, screenSize.h.float
 
-  var pos = vec2(center.x - 100, center.y - 100)
 
-  for row in grid:
-    for tile in row:
-      ctx.fillStyle = tile.color
-      drawTile pos.x, pos.y
-      if tile.data != "":
-        screen.fillText(font, tile.data, translate(pos), vec2(0, 0), haCenter, vaMiddle)
-      pos.x += 100
-    pos.x = center.x - 100
-    pos.y += 100
+main:
+  clearScreen()
+
+  for (_, spos, tile) in gridItor():
+    ctx.fillStyle = tile.color
+    drawRect spos.x, spos.y, 100, 100
+    if tile.data != "":
+      screen.fillText(font, tile.data, translate(spos), vec2(0, 0), haCenter, vaMiddle)
