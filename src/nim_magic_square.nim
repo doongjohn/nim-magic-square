@@ -1,10 +1,6 @@
 import std/math
-import vmath
-import chroma
-import staticglfw
-import glfwutils
-import opengl
-import pixie
+import vmath, chroma, pixie
+import staticglfw, nimglfw, opengl
 import app
 
 
