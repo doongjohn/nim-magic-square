@@ -1,5 +1,7 @@
-import staticglfw
+# example: https://github.com/treeform/pixie/blob/master/examples/realtime_glfw.nim
+
 import vmath
+import staticglfw
 
 
 proc getCursorPos*(window: Window): Vec2 =

@@ -1,3 +1,6 @@
+# Magic square game
+# https://ko.wikipedia.org/wiki/마방진
+
 import std/math
 import vmath, chroma, pixie
 import staticglfw, nimglfw, opengl
