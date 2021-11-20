@@ -19,7 +19,7 @@ font.size = 30
 
 type Tile = object
   color: Color
-  data: string
+  num: int
 
 var grid = [
   [Tile(color: color1), Tile(color: color2), Tile(color: color1)],
@@ -60,7 +60,7 @@ discard setMouseButtonCallback(window,
         let gridPos = screenToGirdPos(window.getCursorPos())
         echo gridPos
         if gridPos.isInGridBound:
-          grid[gridPos.y][gridPos.x].data = "1"
+          inc grid[gridPos.y][gridPos.x].num
       of RELEASE:
         discard
       else: discard
@@ -78,5 +78,5 @@ main:
   for (_, spos, tile) in gridItor():
     ctx.fillStyle = tile.color
     drawRect spos.x, spos.y, 100, 100
-    if tile.data != "":
-      screen.fillText(font, tile.data, translate(spos), vec2(0, 0), haCenter, vaMiddle)
+    if tile.num > 0:
+      screen.fillText(font, $tile.num, translate(spos), vec2(0, 0), haCenter, vaMiddle)
