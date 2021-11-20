@@ -1,11 +1,12 @@
 # import std/math
 import staticglfw
 import opengl
+import vmath
 import pixie
 import display
 
 
-proc onMouseButton(window: Window, button: cint, action: cint, modifiers: cint) {.cdecl.} =
+discard setMouseButtonCallback(window, proc(window: Window, button: cint, action: cint, modifiers: cint) {.cdecl.} =
   if button == MOUSE_BUTTON_RIGHT:
     stdout.write "RMB "
     case action
@@ -18,17 +19,36 @@ proc onMouseButton(window: Window, button: cint, action: cint, modifiers: cint) 
     of PRESS: echo "down"
     of RELEASE: echo "up"
     else: discard
+)
 
-discard setMouseButtonCallback(window, onMouseButton)
+
+const white = parseHex "ffffff"
+const color1 = parseHex "ededed"
+const color2 = parseHex "bfdbff"
+
+var font = readFont("C:/Windows/Fonts/consola.ttf")
+font.size = 30
+
+
+proc drawTile(x, y: float) =
+  drawRect x, y, 100.0, 100.0
 
 
 main:
-  ctx.fillStyle = parseHex "db3327"
-  drawRect center.x, center.y, 100.0, 100.0
+  ctx.fillStyle = white
+  drawRect center.x, center.y, screenSize.w.float, screenSize.h.float
 
-  ctx.fillStyle = parseHex "278ddb"
-  drawRect center.x, center.y + 100, 100.0, 100.0
+  ctx.fillStyle = color1
+  drawTile center.x, center.y + 100
+  drawTile center.x, center.y - 100
+  drawTile center.x + 100, center.y
+  drawTile center.x - 100, center.y
 
-  ctx.fillStyle = rgba(255, 100, 255, 255)
-  drawRect center.x - 100, center.y + 100, 100.0, 100.0
-  drawRect center.x + 100, center.y + 100, 100.0, 100.0
+  ctx.fillStyle = color2
+  drawTile center.x, center.y
+  drawTile center.x - 100, center.y + 100
+  drawTile center.x + 100, center.y + 100
+  drawTile center.x - 100, center.y - 100
+  drawTile center.x + 100, center.y - 100
+
+  screen.fillText(font, "1", translate(center), vec2(0, 0), haCenter, vaMiddle)

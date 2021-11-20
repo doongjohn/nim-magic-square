@@ -1,10 +1,11 @@
 import staticglfw
 import opengl
+import vmath
 import pixie
 
 
 const screenSize* = (w: 500, h: 500)
-const center* = (x: screenSize.w / 2, y: screenSize.h / 2)
+const center* = vec2(screenSize.w / 2, screenSize.h / 2)
 
 var screen* = newImage(screenSize.w, screenSize.h)
 var ctx* = newContext(screen)
@@ -47,8 +48,6 @@ template main*(body: typed) =
 
     inc frameCount
     swapBuffers(window)
-
-  screen.fill(parseHex "ffffff")
 
   # allocate a texture and bind it
   var dataPtr = ctx.image.data[0].addr
