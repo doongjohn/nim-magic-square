@@ -1,6 +1,12 @@
 # Magic square game
 # https://ko.wikipedia.org/wiki/마방진
 
+# TODO:
+# - [ ] generic grid api
+# - [ ] arrow key selection
+# - [ ] auto generate hint
+
+
 import std/math
 import std/algorithm
 import vmath, chroma, pixie
@@ -18,16 +24,21 @@ type Tile = ref object
   locked: bool
   num: int
 
-type Grid = array[3, array[3, Tile]]
+type Grid = array[4, array[4, Tile]]
 
 
-var selected: Tile = nil
-
-var grid = [
-  [Tile(), Tile(), Tile()],
-  [Tile(), Tile(), Tile()],
-  [Tile(), Tile(), Tile()],
+var grid: Grid = [
+  [Tile(), Tile(), Tile(), Tile()],
+  [Tile(), Tile(), Tile(), Tile()],
+  [Tile(), Tile(), Tile(), Tile()],
+  [Tile(), Tile(), Tile(), Tile()],
 ]
+
+
+const cellSize = 100.0
+const tileSize = 90.0
+const offset = cellSize * floor(grid.high / 2) + cellSize / 2
+var selected: Tile = nil
 
 
 template at(grid: Grid, x, y: int): Tile {.used.} = grid[y][x]
@@ -37,30 +48,30 @@ template at(grid: Grid, pos: IVec2): Tile {.used.} = grid[pos.y][pos.x]
 proc isInGridBound(gridPos: IVec2): bool =
   gridPos.x >= 0 and
   gridPos.y >= 0 and
-  gridPos.x < 3 and
-  gridPos.y < 3
+  gridPos.x < grid.len and
+  gridPos.y < grid.len
 
 
 proc screenToGirdPos(screenPos: Vec2): IVec2 =
-  result.x = ((center.x - 150 - screenPos.x) / -100).floor.int32
-  result.y = ((center.y - 150 - screenPos.y) / -100).floor.int32
+  result.x = ((center.x - offset - cellSize / 2 - screenPos.x) / -cellSize).floor.int32
+  result.y = ((center.y - offset - cellSize / 2 - screenPos.y) / -cellSize).floor.int32
 
 
 iterator iterate(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
   # gpos => grid pos
   # spos => screen pos
-  var s = vec2(center.x - 100, center.y - 100)
+  var spos = vec2(center.x - offset, center.y - offset)
   for y, row in grid:
     for x, tile in row:
-      yield (ivec2(x, y), vec2(s.x, s.y), tile)
-      s.x += 100
-    s.x = center.x - 100
-    s.y += 100
+      yield (ivec2(x, y), spos, tile)
+      spos.x += cellSize
+    spos.x = center.x - offset
+    spos.y += cellSize
 
 
-iterator lines(grid: Grid): array[3, Tile] =
-  const arr = [0, 1, 2]
-  var line: array[3, Tile]
+iterator lines(grid: Grid): array[4, Tile] =
+  const arr = [0, 1, 2, 3]
+  var line: array[4, Tile]
 
   # vertical lines
   for x in arr:
@@ -83,14 +94,21 @@ iterator lines(grid: Grid): array[3, Tile] =
   yield line
 
 
-proc sum(line: array[3, Tile]): int =
+proc sum(line: openArray[Tile]): int =
   for i in line: result += i.num
 
 
 proc evalMagicSquare: bool =
   result = true
   for line in grid.lines:
-    if line.sum != 15: return false
+    if line.sum != 34:
+      return false
+
+
+proc gameOver =
+  selected = nil
+  for (_, _, tile) in grid.iterate:
+    tile.locked = true
 
 
 window.onMouseButton:
@@ -110,13 +128,14 @@ window.onMouseButton:
 window.onKeyboard:
   if selected == nil: return
   if action == PRESS:
+    if key == KEY_BACKSPACE:
+      selected.num = selected.num div 10
+      if evalMagicSquare(): gameOver()
     if key in KEY_KP_0 .. KEY_KP_9:
-      selected.num = (key - KEY_KP_0).int
-      if evalMagicSquare():
-        # magic square is complete
-        selected = nil
-        for (_, _, tile) in grid.iterate:
-          tile.locked = true
+      let newNum = selected.num * 10 + (key - KEY_KP_0).int
+      if newNum <= grid.len * grid.len:
+        selected.num = newNum
+        if evalMagicSquare(): gameOver()
 
 
 # font settings
@@ -140,7 +159,7 @@ main:
     else:
       tile.color
 
-    drawRect spos.x, spos.y, 90, 90
+    drawRect spos.x, spos.y, tileSize, tileSize
 
     if tile.num > 0:
       ctx.fillStyle = static: parseHex "000000"
