@@ -58,29 +58,39 @@ iterator iterate(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
     s.y += 100
 
 
-iterator allLines(grid: Grid): array[3, Tile] =
+iterator lines(grid: Grid): array[3, Tile] =
+  const arr = [0, 1, 2]
   var line: array[3, Tile]
+
   # vertical lines
-  for x in 0 .. grid.high:
-    for y in 0 .. grid.high: line[x] = grid[y][x]
-  yield line
+  for x in arr:
+    for y in arr:
+      line[y] = grid[y][x]
+    yield line
+
   # horizontal lines
-  for y in 0 .. grid.high:
-    for x in 0 .. grid.high: line[y] = grid[y][x]
-  yield line
+  for y in arr:
+    for x in arr:
+      line[x] = grid[y][x]
+    yield line
+
   # diagonal lines
-  for x, y in [0, 1, 2]: line[x] = grid[y][x]
-  for x, y in [0, 1, 2].reversed: line[x] = grid[y][x]
+  for x, y in arr: line[x] = grid[y][x]
+  yield line
+
+  # diagonal lines
+  for x, y in arr.reversed: line[x] = grid[y][x]
+  yield line
 
 
-proc addLine(line: array[3, Tile]): int =
+proc sum(line: array[3, Tile]): int =
   for i in line: result += i.num
 
 
 proc evalMagicSquare: bool =
   result = true
-  for line in grid.allLines:
-    if line.addLine != 15: return false
+  for line in grid.lines:
+    if line.sum != 15: return false
 
 
 window.onMouseButton:
@@ -100,30 +110,22 @@ window.onMouseButton:
 window.onKeyboard:
   if selected == nil: return
   if action == PRESS:
-    case key
-    of KEY_KP_0: selected.num = 0
-    of KEY_KP_1: selected.num = 1
-    of KEY_KP_2: selected.num = 2
-    of KEY_KP_3: selected.num = 3
-    of KEY_KP_4: selected.num = 4
-    of KEY_KP_5: selected.num = 5
-    of KEY_KP_6: selected.num = 6
-    of KEY_KP_7: selected.num = 7
-    of KEY_KP_8: selected.num = 8
-    of KEY_KP_9: selected.num = 9
-    else: discard
-
-    if evalMagicSquare():
-      echo "magic square has been completed!"
-    else:
-      echo "magic square is not yet complete..."
+    if key in KEY_KP_0 .. KEY_KP_9:
+      selected.num = (key - KEY_KP_0).int
+      if evalMagicSquare():
+        # magic square is complete
+        selected = nil
+        for (_, _, tile) in grid.iterate:
+          tile.locked = true
 
 
+# font settings
 ctx.font = "C:/Windows/Fonts/consola.ttf"
 ctx.fontSize = 30
 ctx.textAlign = haCenter
 
 
+# main loop
 main:
   clearScreen()
 
@@ -134,7 +136,7 @@ main:
       color2
 
     ctx.fillStyle = if tile == selected:
-      tile.color.darken 0.1
+      tile.color.darken 0.05
     else:
       tile.color
 
