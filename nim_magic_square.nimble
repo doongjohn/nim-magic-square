@@ -2,10 +2,10 @@
 
 version       = "0.1.0"
 author        = "doongjohn"
-description   = "A new awesome nimble package"
+description   = "magic square game"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["nim_magic_square"]
+namedBin["main"] = "magic square"
 
 
 # Dependencies
