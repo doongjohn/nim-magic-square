@@ -2,6 +2,7 @@
 # https://ko.wikipedia.org/wiki/마방진
 
 import std/math
+import std/algorithm
 import vmath, chroma, pixie
 import staticglfw, nimglfw, opengl
 import app
@@ -14,6 +15,7 @@ const
 
 type Tile = ref object
   color: Color
+  locked: bool
   num: int
 
 type Grid = array[3, array[3, Tile]]
@@ -22,22 +24,10 @@ type Grid = array[3, array[3, Tile]]
 var selected: Tile = nil
 
 var grid = [
-  [Tile(color: color1), Tile(color: color2), Tile(color: color1)],
-  [Tile(color: color2), Tile(color: color1), Tile(color: color2)],
-  [Tile(color: color1), Tile(color: color2), Tile(color: color1)],
+  [Tile(), Tile(), Tile()],
+  [Tile(), Tile(), Tile()],
+  [Tile(), Tile(), Tile()],
 ]
-
-
-iterator iterate(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
-  # gpos => grid pos
-  # spos => screen pos
-  var s = vec2(center.x - 100, center.y - 100)
-  for y, row in grid:
-    for x, tile in row:
-      yield (ivec2(x, y), vec2(s.x, s.y), tile)
-      s.x += 100
-    s.x = center.x - 100
-    s.y += 100
 
 
 template at(grid: Grid, x, y: int): Tile {.used.} = grid[y][x]
@@ -56,13 +46,52 @@ proc screenToGirdPos(screenPos: Vec2): IVec2 =
   result.y = ((center.y - 150 - screenPos.y) / -100).floor.int32
 
 
+iterator iterate(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
+  # gpos => grid pos
+  # spos => screen pos
+  var s = vec2(center.x - 100, center.y - 100)
+  for y, row in grid:
+    for x, tile in row:
+      yield (ivec2(x, y), vec2(s.x, s.y), tile)
+      s.x += 100
+    s.x = center.x - 100
+    s.y += 100
+
+
+iterator allLines(grid: Grid): array[3, Tile] =
+  var line: array[3, Tile]
+  # vertical lines
+  for x in 0 .. grid.high:
+    for y in 0 .. grid.high: line[x] = grid[y][x]
+  yield line
+  # horizontal lines
+  for y in 0 .. grid.high:
+    for x in 0 .. grid.high: line[y] = grid[y][x]
+  yield line
+  # diagonal lines
+  for x, y in [0, 1, 2]: line[x] = grid[y][x]
+  for x, y in [0, 1, 2].reversed: line[x] = grid[y][x]
+
+
+proc addLine(line: array[3, Tile]): int =
+  for i in line: result += i.num
+
+
+proc evalMagicSquare: bool =
+  result = true
+  for line in grid.allLines:
+    if line.addLine != 15: return false
+
+
 window.onMouseButton:
   if button == MOUSE_BUTTON_LEFT:
     case action
     of PRESS:
       let pos = window.getCursorPos.screenToGirdPos
-      if pos.isInGridBound:
+      if pos.isInGridBound and not grid.at(pos).locked:
         selected = grid.at(pos)
+      else:
+        selected = nil
     of RELEASE:
       discard
     else: discard
@@ -84,6 +113,11 @@ window.onKeyboard:
     of KEY_KP_9: selected.num = 9
     else: discard
 
+    if evalMagicSquare():
+      echo "magic square has been completed!"
+    else:
+      echo "magic square is not yet complete..."
+
 
 ctx.font = "C:/Windows/Fonts/consola.ttf"
 ctx.fontSize = 30
@@ -94,11 +128,18 @@ main:
   clearScreen()
 
   for (_, spos, tile) in grid.iterate:
-    if tile == selected:
-      ctx.fillStyle = tile.color.darken 0.1
+    tile.color = if tile.locked:
+      color1
     else:
-      ctx.fillStyle = tile.color
-    drawRect spos.x, spos.y, 100, 100
+      color2
+
+    ctx.fillStyle = if tile == selected:
+      tile.color.darken 0.1
+    else:
+      tile.color
+
+    drawRect spos.x, spos.y, 90, 90
+
     if tile.num > 0:
       ctx.fillStyle = static: parseHex "000000"
       ctx.fillText($tile.num, vec2(spos.x, spos.y + 5))
