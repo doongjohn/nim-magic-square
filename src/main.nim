@@ -24,32 +24,35 @@ type Tile = ref object
   locked: bool
   num: int
 
-type Grid = array[4, array[4, Tile]]
+
+type Grid = ref object
+  size: int
+  tiles: seq[seq[Tile]]
 
 
-var grid: Grid = [
-  [Tile(), Tile(), Tile(), Tile()],
-  [Tile(), Tile(), Tile(), Tile()],
-  [Tile(), Tile(), Tile(), Tile()],
-  [Tile(), Tile(), Tile(), Tile()],
-]
+let grid = Grid(size: 4, tiles: @[
+  @[Tile(), Tile(), Tile(), Tile()],
+  @[Tile(), Tile(), Tile(), Tile()],
+  @[Tile(), Tile(), Tile(), Tile()],
+  @[Tile(), Tile(), Tile(), Tile()],
+])
 
 
 const cellSize = 100.0
 const tileSize = 90.0
-const offset = cellSize * floor(grid.high / 2) + cellSize / 2
+let offset = cellSize * floor(grid.size / 2) + cellSize / 2
 var selected: Tile = nil
 
 
-template at(grid: Grid, x, y: int): Tile {.used.} = grid[y][x]
-template at(grid: Grid, pos: IVec2): Tile {.used.} = grid[pos.y][pos.x]
+template at(grid: Grid, x, y: int): Tile {.used.} = grid.tiles[y][x]
+template at(grid: Grid, pos: IVec2): Tile {.used.} = grid.tiles[pos.y][pos.x]
 
 
 proc isInGridBound(gridPos: IVec2): bool =
   gridPos.x >= 0 and
   gridPos.y >= 0 and
-  gridPos.x < grid.len and
-  gridPos.y < grid.len
+  gridPos.x < grid.size and
+  gridPos.y < grid.size
 
 
 proc screenToGirdPos(screenPos: Vec2): IVec2 =
@@ -61,7 +64,7 @@ iterator iterate(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
   # gpos => grid pos
   # spos => screen pos
   var spos = vec2(center.x - offset, center.y - offset)
-  for y, row in grid:
+  for y, row in grid.tiles:
     for x, tile in row:
       yield (ivec2(x, y), spos, tile)
       spos.x += cellSize
