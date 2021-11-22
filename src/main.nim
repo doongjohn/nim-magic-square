@@ -2,13 +2,14 @@
 # https://ko.wikipedia.org/wiki/마방진
 
 # TODO:
-# - [ ] generic grid api
-# - [ ] arrow key selection
+# - [ ] arrow key to move selection
+# - [ ] press enter to confirm
 # - [ ] auto generate hint
 
 
 import std/math
 import std/algorithm
+import std/sequtils
 import vmath, chroma, pixie
 import staticglfw, nimglfw, opengl
 import app
@@ -30,6 +31,12 @@ type Grid = ref object
   tiles: seq[seq[Tile]]
 
 
+# let grid = Grid(size: 3, tiles: @[
+#   @[Tile(), Tile(), Tile()],
+#   @[Tile(), Tile(), Tile()],
+#   @[Tile(), Tile(), Tile()],
+# ])
+
 let grid = Grid(size: 4, tiles: @[
   @[Tile(), Tile(), Tile(), Tile()],
   @[Tile(), Tile(), Tile(), Tile()],
@@ -37,11 +44,27 @@ let grid = Grid(size: 4, tiles: @[
   @[Tile(), Tile(), Tile(), Tile()],
 ])
 
+# let grid = Grid(size: 5, tiles: @[
+#   @[Tile(), Tile(), Tile(), Tile(), Tile()],
+#   @[Tile(), Tile(), Tile(), Tile(), Tile()],
+#   @[Tile(), Tile(), Tile(), Tile(), Tile()],
+#   @[Tile(), Tile(), Tile(), Tile(), Tile()],
+#   @[Tile(), Tile(), Tile(), Tile(), Tile()],
+# ])
+
 
 const cellSize = 100.0
 const tileSize = 90.0
-let offset = cellSize * floor(grid.size / 2) + cellSize / 2
-var selected: Tile = nil
+var selected: tuple[tile: Tile, pos: IVec2] = (nil, ivec2())
+
+
+proc newSeqAscending[T](len: int): seq[T] =
+  var i = -1
+  newSeq[int](grid.size).map(
+    proc(x: int): int =
+      inc i
+      i
+  )
 
 
 template at(grid: Grid, x, y: int): Tile {.used.} = grid.tiles[y][x]
@@ -56,44 +79,45 @@ proc isInGridBound(gridPos: IVec2): bool =
 
 
 proc screenToGirdPos(screenPos: Vec2): IVec2 =
-  result.x = ((center.x - offset - cellSize / 2 - screenPos.x) / -cellSize).floor.int32
-  result.y = ((center.y - offset - cellSize / 2 - screenPos.y) / -cellSize).floor.int32
+  result.x = ((center.x - screenPos.x - cellSize * floor(grid.size / 2) - cellSize / 2 * (grid.size mod 2).float) / -cellSize).floor.int32
+  result.y = ((center.y - screenPos.y - cellSize * floor(grid.size / 2) - cellSize / 2 * (grid.size mod 2).float) / -cellSize).floor.int32
 
 
 iterator iterate(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
   # gpos => grid pos
   # spos => screen pos
-  var spos = vec2(center.x - offset, center.y - offset)
+  let offset = -cellSize / 2 * (grid.size mod 2 - 1).float - cellSize * floor(grid.size / 2)
+  var spos = vec2(center.x + offset, center.y + offset)
   for y, row in grid.tiles:
     for x, tile in row:
-      yield (ivec2(x, y), spos, tile)
+      yield (ivec2(x.int32, y.int32), spos, tile)
       spos.x += cellSize
-    spos.x = center.x - offset
+    spos.x = center.x + offset
     spos.y += cellSize
 
 
-iterator lines(grid: Grid): array[4, Tile] =
-  const arr = [0, 1, 2, 3]
-  var line: array[4, Tile]
+iterator lines(grid: Grid): seq[Tile] =
+  let asc = newSeqAscending[int](grid.size)
+  var line = newSeq[Tile](grid.size)
 
   # vertical lines
-  for x in arr:
-    for y in arr:
-      line[y] = grid[y][x]
+  for x in asc:
+    for y in asc:
+      line[y] = grid.tiles[y][x]
     yield line
 
   # horizontal lines
-  for y in arr:
-    for x in arr:
-      line[x] = grid[y][x]
+  for y in asc:
+    for x in asc:
+      line[x] = grid.tiles[y][x]
     yield line
 
   # diagonal lines
-  for x, y in arr: line[x] = grid[y][x]
+  for x, y in asc: line[x] = grid.tiles[y][x]
   yield line
 
   # diagonal lines
-  for x, y in arr.reversed: line[x] = grid[y][x]
+  for x, y in asc.reversed: line[x] = grid.tiles[y][x]
   yield line
 
 
@@ -104,12 +128,12 @@ proc sum(line: openArray[Tile]): int =
 proc evalMagicSquare: bool =
   result = true
   for line in grid.lines:
-    if line.sum != 34:
+    if line.sum != (grid.size * (grid.size ^ 2 + 1)) div 2:
       return false
 
 
 proc gameOver =
-  selected = nil
+  selected.tile = nil
   for (_, _, tile) in grid.iterate:
     tile.locked = true
 
@@ -120,25 +144,43 @@ window.onMouseButton:
     of PRESS:
       let pos = window.getCursorPos.screenToGirdPos
       if pos.isInGridBound and not grid.at(pos).locked:
-        selected = grid.at(pos)
+        selected.tile = grid.at(pos)
+        selected.pos = pos
       else:
-        selected = nil
+        selected.tile = nil
     of RELEASE:
       discard
     else: discard
 
 
 window.onKeyboard:
-  if selected == nil: return
-  if action == PRESS:
-    if key == KEY_BACKSPACE:
-      selected.num = selected.num div 10
+  if action != PRESS or selected.tile == nil:
+    return
+
+  # arrow movement
+  if key in KEY_RIGHT .. KEY_UP:
+    var newPos = ivec2(-1, -1)
+    case key
+    of KEY_UP: newPos = ivec2(selected.pos.x, selected.pos.y - 1)
+    of KEY_DOWN: newPos = ivec2(selected.pos.x, selected.pos.y + 1)
+    of KEY_RIGHT: newPos = ivec2(selected.pos.x + 1, selected.pos.y)
+    of KEY_LEFT: newPos = ivec2(selected.pos.x - 1, selected.pos.y)
+    else: discard
+    if newPos.isInGridBound:
+      selected.tile = grid.at(newPos)
+      selected.pos = newPos
+
+  # erase number
+  if key == KEY_BACKSPACE:
+    selected.tile.num = selected.tile.num div 10
+    if evalMagicSquare(): gameOver()
+
+  # write number
+  if key in KEY_KP_0 .. KEY_KP_9:
+    let newNum = selected.tile.num * 10 + (key - KEY_KP_0).int
+    if newNum <= grid.size * grid.size:
+      selected.tile.num = newNum
       if evalMagicSquare(): gameOver()
-    if key in KEY_KP_0 .. KEY_KP_9:
-      let newNum = selected.num * 10 + (key - KEY_KP_0).int
-      if newNum <= grid.len * grid.len:
-        selected.num = newNum
-        if evalMagicSquare(): gameOver()
 
 
 # font settings
@@ -157,7 +199,7 @@ main:
     else:
       color2
 
-    ctx.fillStyle = if tile == selected:
+    ctx.fillStyle = if tile == selected.tile:
       tile.color.darken 0.05
     else:
       tile.color

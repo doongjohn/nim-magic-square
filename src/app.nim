@@ -4,7 +4,7 @@ import vmath
 import pixie
 
 
-const screenSize* = (w: 500, h: 500)
+const screenSize* = (w: 600, h: 600)
 const center* = vec2(screenSize.w / 2, screenSize.h / 2)
 
 var ctx* = newContext(screenSize.w, screenSize.h)
