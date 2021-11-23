@@ -143,6 +143,7 @@ proc evalMagicSquare: bool =
 
 
 proc gameCompelete =
+  # TODO: remove selected, duplicate, interactivity
   selected.tile = nil
   for (_, _, tile) in grid.iterate:
     tile.locked = true
