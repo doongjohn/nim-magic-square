@@ -2,7 +2,6 @@
 # https://ko.wikipedia.org/wiki/마방진
 
 # TODO:
-# - [ ] press enter to confirm
 # - [ ] auto generate hint
 
 
@@ -58,6 +57,7 @@ const tileSize = 90.0
 var selected: tuple[tile: Tile, pos: IVec2] = (nil, ivec2())
 var duplicate: Tile = nil
 var typedNum = 0
+var gameEnded = false
 
 
 proc newSeqAscending[T](len: int): seq[T] =
@@ -143,8 +143,9 @@ proc evalMagicSquare: bool =
 
 
 proc gameCompelete =
-  # TODO: remove selected, duplicate, interactivity
+  gameEnded = true
   selected.tile = nil
+  duplicate = nil
   for (_, _, tile) in grid.iterate:
     tile.locked = true
 
@@ -161,6 +162,9 @@ proc confirmTypedNum =
 
 
 window.onMouseButton:
+  if gameEnded:
+    return
+
   if button == MOUSE_BUTTON_LEFT:
     case action
     of PRESS:
@@ -180,6 +184,9 @@ window.onMouseButton:
 
 
 window.onKeyboard:
+  if gameEnded:
+    return
+
   if action != PRESS:
     return
 
