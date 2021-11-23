@@ -2,7 +2,6 @@
 # https://ko.wikipedia.org/wiki/마방진
 
 # TODO:
-# - [ ] arrow key to move selection
 # - [ ] press enter to confirm
 # - [ ] auto generate hint
 
@@ -18,6 +17,7 @@ import app
 const
   color1 = parseHex "bfdbff"
   color2 = parseHex "ededed"
+  color3 = parseHex "ff9494"
 
 
 type Tile = ref object
@@ -56,6 +56,8 @@ let grid = Grid(size: 4, tiles: @[
 const cellSize = 100.0
 const tileSize = 90.0
 var selected: tuple[tile: Tile, pos: IVec2] = (nil, ivec2())
+var duplicate: Tile = nil
+var typedNum = 0
 
 
 proc newSeqAscending[T](len: int): seq[T] =
@@ -121,6 +123,14 @@ iterator lines(grid: Grid): seq[Tile] =
   yield line
 
 
+proc findDuplicate(grid: Grid, this: Tile, num: int): Tile =
+  result = nil
+  if num != 0:
+    for (gpos, _, tile) in grid.iterate():
+      if tile.num == num and tile != this:
+        return tile
+
+
 proc sum(line: openArray[Tile]): int =
   for i in line: result += i.num
 
@@ -132,10 +142,21 @@ proc evalMagicSquare: bool =
       return false
 
 
-proc gameOver =
+proc gameCompelete =
   selected.tile = nil
   for (_, _, tile) in grid.iterate:
     tile.locked = true
+
+
+proc confirmTypedNum =
+  defer: duplicate = nil
+  if duplicate == nil:
+    selected.tile.num = typedNum
+    if evalMagicSquare():
+      gameCompelete()
+  else:
+    selected.tile.num = 0
+    typedNum = 0
 
 
 window.onMouseButton:
@@ -144,9 +165,13 @@ window.onMouseButton:
     of PRESS:
       let pos = window.getCursorPos.screenToGirdPos
       if pos.isInGridBound and not grid.at(pos).locked:
+        if selected.tile != nil:
+          confirmTypedNum()
         selected.tile = grid.at(pos)
         selected.pos = pos
-      else:
+        typedNum = selected.tile.num
+      elif selected.tile != nil:
+        confirmTypedNum()
         selected.tile = nil
     of RELEASE:
       discard
@@ -154,33 +179,56 @@ window.onMouseButton:
 
 
 window.onKeyboard:
-  if action != PRESS or selected.tile == nil:
+  if action != PRESS:
     return
+
+  if key in KEY_RIGHT .. KEY_UP and selected.tile == nil:
+    selected.tile = grid.at(0, 0)
+    selected.pos = ivec2(0, 0)
+    typedNum = selected.tile.num
+    return
+
+  if selected.tile == nil:
+    return
+
+  if key == KEY_ESCAPE:
+    confirmTypedNum()
+    selected.tile = nil
 
   # arrow movement
   if key in KEY_RIGHT .. KEY_UP:
     var newPos = ivec2(-1, -1)
     case key
-    of KEY_UP: newPos = ivec2(selected.pos.x, selected.pos.y - 1)
-    of KEY_DOWN: newPos = ivec2(selected.pos.x, selected.pos.y + 1)
-    of KEY_RIGHT: newPos = ivec2(selected.pos.x + 1, selected.pos.y)
-    of KEY_LEFT: newPos = ivec2(selected.pos.x - 1, selected.pos.y)
+    of KEY_UP:
+      newPos = ivec2(selected.pos.x, selected.pos.y - 1)
+    of KEY_DOWN:
+      newPos = ivec2(selected.pos.x, selected.pos.y + 1)
+    of KEY_RIGHT:
+      newPos = ivec2(selected.pos.x + 1, selected.pos.y)
+    of KEY_LEFT:
+      newPos = ivec2(selected.pos.x - 1, selected.pos.y)
     else: discard
     if newPos.isInGridBound:
+      confirmTypedNum()
       selected.tile = grid.at(newPos)
       selected.pos = newPos
+      typedNum = selected.tile.num
 
   # erase number
   if key == KEY_BACKSPACE:
-    selected.tile.num = selected.tile.num div 10
-    if evalMagicSquare(): gameOver()
+    typedNum = typedNum div 10
+    duplicate = grid.findDuplicate(selected.tile, typedNum)
 
   # write number
   if key in KEY_KP_0 .. KEY_KP_9:
-    let newNum = selected.tile.num * 10 + (key - KEY_KP_0).int
+    let newNum = typedNum * 10 + (key - KEY_KP_0).int
     if newNum <= grid.size * grid.size:
-      selected.tile.num = newNum
-      if evalMagicSquare(): gameOver()
+      typedNum = newNum
+      duplicate = grid.findDuplicate(selected.tile, typedNum)
+
+  # confirm number
+  if key == KEY_ENTER:
+    confirmTypedNum()
 
 
 # font settings
@@ -199,13 +247,19 @@ main:
     else:
       color2
 
-    ctx.fillStyle = if tile == selected.tile:
-      tile.color.darken 0.05
-    else:
-      tile.color
+    ctx.fillStyle =
+      if tile == selected.tile:
+        tile.color.darken 0.05
+      elif tile == duplicate:
+        color3
+      else:
+        tile.color
 
     drawRect spos.x, spos.y, tileSize, tileSize
 
-    if tile.num > 0:
-      ctx.fillStyle = static: parseHex "000000"
+    ctx.fillStyle = static: parseHex "000000"
+    if tile == selected.tile:
+      if typedNum > 0:
+        ctx.fillText($typedNum, vec2(spos.x, spos.y + 5))
+    elif tile.num > 0:
       ctx.fillText($tile.num, vec2(spos.x, spos.y + 5))
