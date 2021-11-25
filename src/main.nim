@@ -20,22 +20,10 @@ const
   tileSize = 90.0
 
 
-var gameEnded = false
 let grid = initGrid(center, 4, 100)
-
-
-type Selected = object
-  input: int
-  pos: IVec2
-  tile: Tile
-  dup: Tile
-
-var selected = Selected(
-  input: 0,
-  pos: ivec2(-1, -1),
-  tile: nil,
-  dup: nil
-)
+var gameEnded = false
+var selected: tuple[input: int, pos: IVec2, tile, dup: Tile] =
+  (0, ivec2(-1, -1), nil, nil)
 
 
 proc gameCompelete =
