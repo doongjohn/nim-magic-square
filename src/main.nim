@@ -2,6 +2,7 @@
 # https://ko.wikipedia.org/wiki/마방진
 
 # TODO:
+# - [ ] display sum
 # - [ ] auto generate hint
 
 
@@ -22,8 +23,8 @@ const
 
 let grid = initGrid(center, 4, 100)
 var gameEnded = false
-var selected: tuple[input: int, pos: IVec2, tile, dup: Tile] =
-  (0, ivec2(-1, -1), nil, nil)
+var selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
+  (ivec2(-1, -1), 0, nil, nil)
 
 
 proc gameCompelete =
@@ -34,11 +35,11 @@ proc gameCompelete =
     tile.locked = true
 
 
-template calcMagicSquareSum(size: int): int =
+template calcMagicSquareMinSum(size: int): int =
   (size * (size ^ 2 + 1)) div 2
 
 
-let magicSquareSum = calcMagicSquareSum grid.size
+let magicSquareSum = calcMagicSquareMinSum grid.size
 
 
 proc evalMagicSquare: bool =
@@ -49,14 +50,18 @@ proc evalMagicSquare: bool =
 
 
 proc evalInput =
-  defer: selected.dup = nil
+  selected.tile.num = selected.input
+  if evalMagicSquare():
+    gameCompelete()
+
+
+proc updateInput =
   if selected.dup == nil:
-    selected.tile.num = selected.input
-    if evalMagicSquare():
-      gameCompelete()
+    evalInput()
   else:
-    selected.tile.num = 0
     selected.input = 0
+    selected.tile.num = 0
+    selected.dup = nil
 
 
 # mouse input logic
@@ -70,12 +75,13 @@ window.onMouseButton:
       let pos = grid.screenToGirdPos window.getCursorPos
       if grid.isInBound(pos) and not grid.at(pos).locked:
         if selected.tile != nil:
-          evalInput()
-        selected.tile = grid.at(pos)
+          updateInput()
+        let tile = grid.at(pos)
         selected.pos = pos
-        selected.input = selected.tile.num
+        selected.input = tile.num
+        selected.tile = tile
       elif selected.tile != nil:
-        evalInput()
+        updateInput()
         selected.tile = nil
     of RELEASE:
       discard
@@ -91,16 +97,16 @@ window.onKeyboard:
     return
 
   if key in KEY_RIGHT .. KEY_UP and selected.tile == nil:
-    selected.tile = grid.at(0, 0)
     selected.pos = ivec2(0, 0)
     selected.input = selected.tile.num
+    selected.tile = grid.at(0, 0)
     return
 
   if selected.tile == nil:
     return
 
   if key == KEY_ESCAPE:
-    evalInput()
+    updateInput()
     selected.tile = nil
 
   # arrow movement
@@ -117,15 +123,18 @@ window.onKeyboard:
       newPos = ivec2(selected.pos.x - 1, selected.pos.y)
     else: discard
     if grid.isInBound(newPos):
-      evalInput()
-      selected.tile = grid.at(newPos)
+      updateInput()
+      let tile = grid.at(newPos)
       selected.pos = newPos
-      selected.input = selected.tile.num
+      selected.input = tile.num
+      selected.tile = tile
 
   # erase number
   if key == KEY_BACKSPACE:
     selected.input = selected.input div 10
     selected.dup = grid.findDuplicate(selected.tile, selected.input)
+    if selected.dup == nil:
+      evalInput()
 
   # write number
   if key in KEY_KP_0 .. KEY_KP_9:
@@ -133,10 +142,12 @@ window.onKeyboard:
     if newNum <= grid.size * grid.size:
       selected.input = newNum
       selected.dup = grid.findDuplicate(selected.tile, selected.input)
+      if selected.dup == nil:
+        evalInput()
 
   # confirm number
   if key == KEY_ENTER:
-    evalInput()
+    updateInput()
 
 
 # font settings

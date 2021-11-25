@@ -1,4 +1,5 @@
 import std/algorithm
+import std/sequtils
 import utils
 import pixie
 
@@ -59,21 +60,36 @@ iterator iterate*(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
     spos.y += grid.cellSize
 
 
+iterator rows*(grid: Grid): seq[Tile] =
+  for row in grid.tiles:
+    yield row
+
+
+iterator cols*(grid: Grid, container: var seq[Tile]): seq[Tile] =
+  for x in 0 ..< grid.size:
+    container.setLen 0
+    for y in 0 ..< grid.size:
+      container.add grid.tiles[y][x]
+    yield container
+
+
+iterator cols*(grid: Grid): seq[Tile] =
+  var col = newSeq[Tile](grid.size)
+  for _ in grid.cols(col):
+    yield col
+
+
 iterator lines*(grid: Grid): seq[Tile] =
-  let asc = newSeqAscending[int](grid.size)
   var line = newSeq[Tile](grid.size)
+  let asc = newSeqAscending[int](grid.size)
 
   # vertical lines
-  for x in asc:
-    for y in asc:
-      line[y] = grid.tiles[y][x]
-    yield line
+  for row in grid.rows:
+    yield row
 
   # horizontal lines
-  for y in asc:
-    for x in asc:
-      line[x] = grid.tiles[y][x]
-    yield line
+  for col in grid.cols(line):
+    yield col
 
   # diagonal lines
   for x, y in asc: line[x] = grid.tiles[y][x]
@@ -83,11 +99,10 @@ iterator lines*(grid: Grid): seq[Tile] =
 
 
 proc findDuplicate*(grid: Grid, this: Tile, num: int): Tile =
-  result = nil
-  if num != 0:
-    for (gpos, _, tile) in grid.iterate():
-      if tile.num == num and tile != this:
-        return tile
+  if num == 0: return nil
+  for (gpos, _, tile) in grid.iterate():
+    if tile.num == num and tile != this:
+      return tile
 
 
 proc sum*(line: openArray[Tile]): int =
