@@ -42,9 +42,17 @@ proc isInBound*(grid: Grid, gridPos: IVec2): bool =
 
 
 proc screenToGirdPos*(grid: Grid, screenPos: Vec2): IVec2 =
-  let odd = (grid.size mod 2).float
-  result.x = ((grid.pos.x - screenPos.x - grid.cellSize * floor(grid.size / 2) - grid.cellSize / 2 * odd) / -grid.cellSize).floor.int32
-  result.y = ((grid.pos.y - screenPos.y - grid.cellSize * floor(grid.size / 2) - grid.cellSize / 2 * odd) / -grid.cellSize).floor.int32
+  let topLeft = vec2(
+    grid.pos.x - grid.cellSize * grid.size.float / 2 + grid.cellSize / 2,
+    grid.pos.y - grid.cellSize * grid.size.float / 2 + grid.cellSize / 2,
+  )
+  result.x = ((screenPos.x - topLeft.x) / grid.cellSize).floor.int32
+  result.y = ((screenPos.y - topLeft.y) / grid.cellSize).floor.int32
+
+
+proc gridToScreenPos(grid: Grid, gridPos: IVec2): Vec2 =
+  # TODO
+  discard
 
 
 iterator iterate*(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
