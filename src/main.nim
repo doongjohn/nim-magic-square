@@ -1,7 +1,13 @@
 # Magic square game
-# https://ko.wikipedia.org/wiki/마방진
+# wiki: https://ko.wikipedia.org/wiki/마방진
+# ref: https://blogs.mathworks.com/cleve/2012/11/05/magic-squares-part-2-algorithms/
+# ref: https://github.com/Coac/MagicSquare/blob/master/src/MagicSquare.java
+# ref: https://github.com/CalebDepatie/MagicSquares
 
 # TODO:
+# - [x] create square of any size
+# - [x] display duplicate error
+# - [x] evaluate magic square
 # - [ ] display sum
 # - [ ] auto generate hint
 
