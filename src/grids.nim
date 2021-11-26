@@ -1,6 +1,4 @@
 import std/algorithm
-import std/sequtils
-import utils
 import pixie
 
 
@@ -94,21 +92,28 @@ iterator cols*(grid: Grid): seq[Tile] =
 
 iterator lines*(grid: Grid): seq[Tile] =
   var line = newSeq[Tile](grid.size)
-  let asc = newSeqAscending[int](grid.size)
 
-  # vertical lines
+  # horizontal lines
   for row in grid.rows:
     yield row
 
-  # horizontal lines
+  # vertical lines
   for col in grid.cols(line):
     yield col
 
   # diagonal lines
-  for x, y in asc: line[x] = grid.tiles[y][x]
+  for x in 0 ..< grid.size:
+    for y in 0 ..< grid.size:
+      line[x] = grid.tiles[y][x]
   yield line
-  for x, y in asc.reversed: line[x] = grid.tiles[y][x]
+  for x in 0 ..< grid.size:
+    for y in  countdown(grid.size - 1, 0):
+      line[x] = grid.tiles[y][x]
   yield line
+
+
+proc sum*(line: openArray[Tile]): int =
+  for i in line: result += i.num
 
 
 proc findDuplicate*(grid: Grid, this: Tile, num: int): Tile =
@@ -116,7 +121,3 @@ proc findDuplicate*(grid: Grid, this: Tile, num: int): Tile =
   for (gpos, _, tile) in grid.iterate():
     if tile.num == num and tile != this:
       return tile
-
-
-proc sum*(line: openArray[Tile]): int =
-  for i in line: result += i.num
