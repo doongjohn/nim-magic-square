@@ -41,30 +41,35 @@ proc isInBound*(grid: Grid, gridPos: IVec2): bool =
   gridPos.y < grid.size
 
 
-proc screenToGirdPos*(grid: Grid, screenPos: Vec2): IVec2 =
-  let topLeft = vec2(
-    grid.pos.x - grid.cellSize * grid.size.float / 2 + grid.cellSize / 2,
-    grid.pos.y - grid.cellSize * grid.size.float / 2 + grid.cellSize / 2,
+template calcTopLeftPos*(grid: Grid): Vec2 =
+  vec2(
+    grid.pos.x - grid.cellSize * grid.size.float / 2,
+    grid.pos.y - grid.cellSize * grid.size.float / 2,
   )
+
+
+proc screenToGirdPos*(grid: Grid, screenPos: Vec2): IVec2 =
+  let topLeft = grid.calcTopLeftPos()
   result.x = ((screenPos.x - topLeft.x) / grid.cellSize).floor.int32
   result.y = ((screenPos.y - topLeft.y) / grid.cellSize).floor.int32
 
 
-proc gridToScreenPos(grid: Grid, gridPos: IVec2): Vec2 =
-  # TODO
-  discard
+proc gridToScreenPos*(grid: Grid, gridPos: IVec2): Vec2 =
+  let topLeft = grid.calcTopLeftPos()
+  result.x = grid.cellSize * gridPos.x.float + topLeft.x + grid.cellSize / 2
+  result.y = grid.cellSize * gridPos.y.float + topLeft.y + grid.cellSize / 2
 
 
 iterator iterate*(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
   # gpos => grid pos
   # spos => screen pos
-  let offset = grid.cellSize / 2 * (grid.size mod 2 - 1).float + grid.cellSize * floor(grid.size / 2)
-  var spos = vec2(grid.pos.x - offset, grid.pos.y - offset)
+  let topLeft = grid.calcTopLeftPos()
+  var spos = topLeft + grid.cellSize / 2
   for y, row in grid.tiles:
     for x, tile in row:
       yield (ivec2(x.int32, y.int32), spos, tile)
       spos.x += grid.cellSize
-    spos.x = grid.pos.x - offset
+    spos.x = topLeft.x + grid.cellSize / 2
     spos.y += grid.cellSize
 
 
