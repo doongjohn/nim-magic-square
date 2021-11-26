@@ -9,26 +9,16 @@ const center* = vec2(screenSize.w / 2, screenSize.h / 2)
 
 var ctx* = newContext(screenSize.w, screenSize.h)
 var window*: Window
-var frameCount = 0
 
 
 # init glfw
 if init() == 1:
   windowHint(RESIZABLE, false.cint)
   window = createWindow(screenSize.w.cint, screenSize.h.cint, "Magic square", nil, nil)
-  makeContextCurrent(window)
+  window.makeContextCurrent()
   loadExtensions()
 else:
   quit("Failed to Initialize GLFW.")
-
-
-proc drawRect*(x, y, width, height: float) =
-  ctx.fillRect(x - width / 2, y - height / 2, width, height)
-
-
-proc clearScreen* =
-  ctx.fillStyle = static: parseHex "ffffff"
-  drawRect center.x, center.y, screenSize.w.float, screenSize.h.float
 
 
 template main*(body: typed) =
@@ -59,5 +49,4 @@ template main*(body: typed) =
     glTexCoord2d(0.0, 1.0); glVertex2d(-1.0, -1.0)
     glEnd()
 
-    inc frameCount
     swapBuffers(window)
