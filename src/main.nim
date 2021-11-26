@@ -112,17 +112,17 @@ window.onKeyboard:
 
   # arrow movement
   if key in KEY_RIGHT .. KEY_UP:
-    var newPos = ivec2(-1, -1)
-    case key
+    var newPos = case key
     of KEY_UP:
-      newPos = ivec2(selected.pos.x, selected.pos.y - 1)
+      ivec2(selected.pos.x, selected.pos.y - 1)
     of KEY_DOWN:
-      newPos = ivec2(selected.pos.x, selected.pos.y + 1)
+      ivec2(selected.pos.x, selected.pos.y + 1)
     of KEY_RIGHT:
-      newPos = ivec2(selected.pos.x + 1, selected.pos.y)
+      ivec2(selected.pos.x + 1, selected.pos.y)
     of KEY_LEFT:
-      newPos = ivec2(selected.pos.x - 1, selected.pos.y)
-    else: discard
+      ivec2(selected.pos.x - 1, selected.pos.y)
+    else:
+      ivec2(-1, -1)
     if grid.isInBound(newPos):
       updateInput()
       let tile = grid.at(newPos)
@@ -175,8 +175,10 @@ main:
       else:
         tile.color
 
+    # draw tile
     drawRect spos.x, spos.y, tileSize, tileSize
 
+    # draw number
     ctx.fillStyle = static: parseHex "000000"
     if tile == selected.tile:
       if selected.input > 0:
