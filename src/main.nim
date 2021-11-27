@@ -30,24 +30,23 @@ const
   tileSize = 90.0
 
 
-var grid = initGrid(center, 3, 100).genHint()
-var gameEnded = false
-var selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
-  (ivec2(-1, -1), 0, nil, nil)
-
-
 template calcMagicSum(size: int): int =
   (size * (size ^ 2 + 1)) div 2
 
 
-var magicSquareSum = calcMagicSum grid.size
+var
+  gameEnded = false
+  grid = initGrid(center, 3, 100).genHint()
+  magicSquareSum = calcMagicSum grid.size
+  selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
+    (ivec2(-1, -1), 0, nil, nil)
 
 
 proc gameRestart =
-  grid = initGrid(center, 3, 100).genHint()
   gameEnded = false
-  selected = (ivec2(-1, -1), 0, nil, nil)
+  grid = initGrid(center, 3, 100).genHint()
   magicSquareSum = calcMagicSum grid.size
+  selected = (ivec2(-1, -1), 0, nil, nil)
 
 
 proc gameCompelete =
