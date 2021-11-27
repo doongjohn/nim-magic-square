@@ -1,3 +1,4 @@
+import std/math
 import std/random
 import std/algorithm
 import grids
@@ -38,11 +39,11 @@ proc genHint*(grid: Grid): Grid =
   result = grid
   let magicSquare = grid.genMagicSquare rand(int.high)
   var hintCount = 2
-  var hintSeq = newAscendingSeq(grid.size)
+  var hintSeq = newAscendingSeq(grid.size ^ 2)
   randomize()
   hintSeq.shuffle()
   for i in 0 ..< hintCount:
     let y = hintSeq[i] div grid.size
-    let x = hintSeq[i] mod (grid.size + 1)
+    let x = hintSeq[i] mod grid.size
     grid.tiles[y][x].num = magicSquare[y][x]
     grid.tiles[y][x].locked = true

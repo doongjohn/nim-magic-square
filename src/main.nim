@@ -30,7 +30,7 @@ const
   tileSize = 90.0
 
 
-let grid = initGrid(center, 3, 100).genHint()
+var grid = initGrid(center, 3, 100).genHint()
 var gameEnded = false
 var selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
   (ivec2(-1, -1), 0, nil, nil)
@@ -40,7 +40,14 @@ template calcMagicSum(size: int): int =
   (size * (size ^ 2 + 1)) div 2
 
 
-let magicSquareSum = calcMagicSum grid.size
+var magicSquareSum = calcMagicSum grid.size
+
+
+proc gameRestart =
+  grid = initGrid(center, 3, 100).genHint()
+  gameEnded = false
+  selected = (ivec2(-1, -1), 0, nil, nil)
+  magicSquareSum = calcMagicSum grid.size
 
 
 proc gameCompelete =
@@ -99,10 +106,14 @@ window.onMouseButton:
 
 # keyboard input logic
 window.onKeyboard:
-  if gameEnded:
+  if action != PRESS:
     return
 
-  if action != PRESS:
+  # restart game
+  if key == KEY_R:
+    gameRestart()
+
+  if gameEnded:
     return
 
   if key in KEY_RIGHT .. KEY_UP and selected.tile == nil:
@@ -151,7 +162,7 @@ window.onKeyboard:
   # write number
   if key in KEY_KP_0 .. KEY_KP_9:
     let newNum = selected.input * 10 + (key - KEY_KP_0).int
-    if newNum <= grid.size * grid.size:
+    if newNum <= grid.size ^ 2:
       selected.input = newNum
       selected.dup = grid.findDuplicate(selected.tile, selected.input)
       if selected.dup == nil:
