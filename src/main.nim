@@ -1,9 +1,10 @@
 # Magic square game
 # ref: https://ko.wikipedia.org/wiki/마방진
-# ref: https://mindyourdecisions.com/blog/2015/11/08/how-many-3x3-magic-squares-are-there-sunday-puzzle/
+# ref: http://www.mathematische-basteleien.de/magsquare.htm
 # ref: https://blogs.mathworks.com/cleve/2012/11/05/magic-squares-part-2-algorithms/
-# ref: https://github.com/Coac/MagicSquare/blob/master/src/MagicSquare.java
-# ref: https://github.com/CalebDepatie/MagicSquares
+# ref: https://mindyourdecisions.com/blog/2015/11/08/how-many-3x3-magic-squares-are-there-sunday-puzzle/
+# source: https://github.com/CalebDepatie/MagicSquares
+# source: https://github.com/Coac/MagicSquare/blob/master/src/MagicSquare.java
 
 # TODO:
 # - [x] create square of any size
