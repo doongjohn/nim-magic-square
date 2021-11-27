@@ -9,7 +9,7 @@ proc newAscendingSeq(len: int): seq[int] =
     n = i
 
 
-proc gen3(seed: int): seq[seq[int]] =
+proc gen3x3(seed: int): seq[seq[int]] =
   var arr = @[1, 6, 7, 2, 9, 4, 3, 8]
   if (seed div 8) mod 2 == 1:
     arr.reverse()
@@ -24,7 +24,7 @@ proc gen3(seed: int): seq[seq[int]] =
 
 proc genMagicSquare*(grid: Grid, seed: int): seq[seq[int]] =
   if grid.size == 3:
-    return gen3 seed
+    return gen3x3 seed
   # TODO
   if grid.size mod 1 == 0:
     discard
@@ -36,13 +36,13 @@ proc genMagicSquare*(grid: Grid, seed: int): seq[seq[int]] =
 
 proc genHint*(grid: Grid): Grid =
   result = grid
-  randomize()
+  let magicSquare = grid.genMagicSquare rand(int.high)
   var hintCount = 2
-  let ms = grid.genMagicSquare rand(int.high)
-  var hintList = newAscendingSeq grid.size
-  hintList.shuffle()
+  var hintSeq = newAscendingSeq(grid.size)
+  randomize()
+  hintSeq.shuffle()
   for i in 0 ..< hintCount:
-    let y = hintList[i] div grid.size
-    let x = hintList[i] mod (grid.size + 1)
-    grid.tiles[y][x].num = ms[y][x]
+    let y = hintSeq[i] div grid.size
+    let x = hintSeq[i] mod (grid.size + 1)
+    grid.tiles[y][x].num = magicSquare[y][x]
     grid.tiles[y][x].locked = true
