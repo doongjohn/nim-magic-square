@@ -11,6 +11,6 @@ namedBin["main"] = "magic square"
 # Dependencies
 
 requires "nim >= 1.7.1"
-requires "pixie"
-requires "opengl"
 requires "staticglfw"
+requires "opengl"
+requires "pixie"

@@ -28,8 +28,12 @@ proc initGrid*(pos: Vec2, size: int, cellSize: float): Grid =
       tile = Tile()
 
 
-template at*(grid: Grid, x, y: int): Tile = grid.tiles[y][x]
-template at*(grid: Grid, pos: IVec2): Tile = grid.tiles[pos.y][pos.x]
+template at*(grid: Grid, x, y: int): Tile =
+ grid.tiles[y][x]
+
+
+template at*(grid: Grid, pos: IVec2): Tile =
+  grid.tiles[pos.y][pos.x]
 
 
 proc isInBound*(grid: Grid, gridPos: IVec2): bool =
