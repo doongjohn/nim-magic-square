@@ -36,19 +36,19 @@ var selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
   (ivec2(-1, -1), 0, nil, nil)
 
 
+template calcMagicSum(size: int): int =
+  (size * (size ^ 2 + 1)) div 2
+
+
+let magicSquareSum = calcMagicSum grid.size
+
+
 proc gameCompelete =
   gameEnded = true
   selected.tile = nil
   selected.dup = nil
   for (_, _, tile) in grid.iterate:
     tile.locked = true
-
-
-template calcMagicSquareMinSum(size: int): int =
-  (size * (size ^ 2 + 1)) div 2
-
-
-let magicSquareSum = calcMagicSquareMinSum grid.size
 
 
 proc evalMagicSquare: bool =
