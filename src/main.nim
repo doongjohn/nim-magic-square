@@ -9,8 +9,9 @@
 # - [x] create square of any size
 # - [x] display duplicate error
 # - [x] evaluate magic square
-# - [ ] display sum
 # - [ ] auto generate hint
+# - [ ] display sum
+# - [ ] display help
 
 
 import std/math
