@@ -2,7 +2,7 @@
 
 Magic square game written in nim
 
-![image](https://user-images.githubusercontent.com/40219740/143594685-0526e106-c707-407c-b9be-af1b68761154.png)
+![image](https://user-images.githubusercontent.com/40219740/143672023-f199d584-a5bb-4124-abb6-0ad178a9b44a.png)
 
 ## Rules
 
