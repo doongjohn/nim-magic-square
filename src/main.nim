@@ -1,5 +1,6 @@
 # Magic square game
-# wiki: https://ko.wikipedia.org/wiki/마방진
+# ref: https://ko.wikipedia.org/wiki/마방진
+# ref: https://mindyourdecisions.com/blog/2015/11/08/how-many-3x3-magic-squares-are-there-sunday-puzzle/
 # ref: https://blogs.mathworks.com/cleve/2012/11/05/magic-squares-part-2-algorithms/
 # ref: https://github.com/Coac/MagicSquare/blob/master/src/MagicSquare.java
 # ref: https://github.com/CalebDepatie/MagicSquares
@@ -19,6 +20,7 @@ import pixie
 import grids
 import app
 import draw
+import gen
 
 
 const
@@ -28,7 +30,7 @@ const
   tileSize = 90.0
 
 
-let grid = initGrid(center, 4, 100)
+let grid = initGrid(center, 3, 100).genHint()
 var gameEnded = false
 var selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
   (ivec2(-1, -1), 0, nil, nil)
@@ -80,7 +82,7 @@ window.onMouseButton:
     case action
     of PRESS:
       let pos = grid.screenToGirdPos window.getCursorPos
-      if grid.isInBound(pos) and not grid.at(pos).locked:
+      if grid.isInBound(pos):
         if selected.tile != nil:
           updateInput()
         let tile = grid.at(pos)
@@ -135,6 +137,9 @@ window.onKeyboard:
       selected.pos = newPos
       selected.input = tile.num
       selected.tile = tile
+
+  if selected.tile.locked:
+    return
 
   # erase number
   if key == KEY_BACKSPACE:
