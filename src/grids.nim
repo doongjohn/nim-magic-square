@@ -29,7 +29,7 @@ proc initGrid*(pos: Vec2, size: int, cellSize: float): Grid =
 
 
 template at*(grid: Grid, x, y: int): Tile =
- grid.tiles[y][x]
+  grid.tiles[y][x]
 
 
 template at*(grid: Grid, pos: IVec2): Tile =
@@ -60,6 +60,16 @@ proc gridToScreenPos*(grid: Grid, gridPos: IVec2): Vec2 =
   let topLeft = grid.calcTopLeftPos()
   result.x = grid.cellSize * gridPos.x.float + topLeft.x + grid.cellSize / 2
   result.y = grid.cellSize * gridPos.y.float + topLeft.y + grid.cellSize / 2
+
+
+proc gridPosAddIndex*(grid: Grid, pos: IVec2, amount: int): IVec2 =
+  let nextX: int32 = pos.x + amount.int32
+  result = if nextX < grid.size:
+    ivec2(nextX, pos.y)
+  else:
+    let size = grid.size.int32
+    let leftOver: int32 = nextX - (size.int32 - 1)
+    ivec2(leftOver mod size.int32 - 1, pos.y + 1 + leftOver div size.int32)
 
 
 iterator iterate*(grid: Grid): tuple[gpos: IVec2, spos: Vec2, tile: Tile] =
@@ -111,7 +121,7 @@ iterator lines*(grid: Grid): seq[Tile] =
       line[x] = grid.tiles[y][x]
   yield line
   for x in 0 ..< grid.size:
-    for y in  countdown(grid.size - 1, 0):
+    for y in countdown(grid.size - 1, 0):
       line[x] = grid.tiles[y][x]
   yield line
 

@@ -38,7 +38,8 @@ template calcMagicSum(size: int): int =
 
 var
   gameEnded = false
-  grid = initGrid(center, 3, 100).genHint 2
+  # grid = initGrid(center, 3, 100).genHint 2
+  grid = initGrid(center, 4, 100)
   magicSquareSum = calcMagicSum grid.size
   selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
     (ivec2(-1, -1), 0, nil, nil)
@@ -46,7 +47,8 @@ var
 
 proc gameRestart =
   gameEnded = false
-  grid = initGrid(center, 3, 100).genHint 2
+  # grid = initGrid(center, 3, 100).genHint 2
+  grid = initGrid(center, 4, 100)
   magicSquareSum = calcMagicSum grid.size
   selected = (ivec2(-1, -1), 0, nil, nil)
 
@@ -117,22 +119,23 @@ window.onKeyboard:
   if gameEnded:
     return
 
-  if key in KEY_RIGHT .. KEY_UP and selected.tile == nil:
-    selected.pos = ivec2(0, 0)
-    selected.input = selected.tile.num
-    selected.tile = grid.at(0, 0)
-    return
-
   if selected.tile == nil:
+    if key == KEY_TAB or key in KEY_RIGHT .. KEY_UP:
+      let tile = grid.at(0, 0)
+      selected.pos = ivec2(0, 0)
+      selected.input = tile.num
+      selected.tile = tile
     return
 
   if key == KEY_ESCAPE:
     updateInput()
     selected.tile = nil
 
-  # arrow movement
-  if key in KEY_RIGHT .. KEY_UP:
+  # selection movement
+  block movement:
     var newPos = case key
+    of KEY_TAB:
+      grid.gridPosAddIndex(selected.pos, 1)
     of KEY_UP:
       ivec2(selected.pos.x, selected.pos.y - 1)
     of KEY_DOWN:
@@ -142,7 +145,7 @@ window.onKeyboard:
     of KEY_LEFT:
       ivec2(selected.pos.x - 1, selected.pos.y)
     else:
-      ivec2(-1, -1)
+      break movement
     if grid.isInBound(newPos):
       updateInput()
       let tile = grid.at(newPos)
