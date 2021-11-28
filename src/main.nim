@@ -181,7 +181,7 @@ ctx.textAlign = haCenter
 
 
 # main loop
-main:
+mainLoop:
   clearScreen()
 
   for (_, spos, tile) in grid.iterate:

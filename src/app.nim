@@ -21,7 +21,7 @@ else:
   quit("Failed to Initialize GLFW.")
 
 
-template main*(body: typed) =
+template mainLoop*(body: typed) =
   # allocate a texture and bind it
   var dataPtr = ctx.image.data[0].addr
   glTexImage2D(GL_TEXTURE_2D, 0, 3, GLsizei screenSize.w, GLsizei screenSize.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, dataPtr)
