@@ -38,7 +38,7 @@ template calcMagicSum(size: int): int =
 
 var
   gameEnded = false
-  grid = initGrid(center, 3, 100).genHint()
+  grid = initGrid(center, 3, 100).genHint 2
   magicSquareSum = calcMagicSum grid.size
   selected: tuple[pos: IVec2, input: int, tile, dup: Tile] =
     (ivec2(-1, -1), 0, nil, nil)
@@ -46,7 +46,7 @@ var
 
 proc gameRestart =
   gameEnded = false
-  grid = initGrid(center, 3, 100).genHint()
+  grid = initGrid(center, 3, 100).genHint 2
   magicSquareSum = calcMagicSum grid.size
   selected = (ivec2(-1, -1), 0, nil, nil)
 

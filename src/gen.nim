@@ -35,12 +35,11 @@ proc genMagicSquare*(grid: Grid, seed: int): seq[seq[int]] =
     discard
 
 
-proc genHint*(grid: Grid): Grid =
+proc genHint*(grid: Grid, hintCount: int): Grid =
   result = grid
-  let magicSquare = grid.genMagicSquare rand(int.high)
-  var hintCount = 2
-  var hintSeq = newAscendingSeq(grid.size ^ 2)
   randomize()
+  let magicSquare = grid.genMagicSquare rand(int.high)
+  var hintSeq = newAscendingSeq(grid.size ^ 2)
   hintSeq.shuffle()
   for i in 0 ..< hintCount:
     let y = hintSeq[i] div grid.size
