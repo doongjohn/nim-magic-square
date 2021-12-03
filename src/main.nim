@@ -32,10 +32,6 @@ const
   tileSize = 90.0
 
 
-template calcMagicSum(size: int): int =
-  (size * (size ^ 2 + 1)) div 2
-
-
 var
   gameEnded = false
   grid = initGrid(center, 4, 100).genHint 3

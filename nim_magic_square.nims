@@ -1,0 +1,4 @@
+--gc: "orc"
+--define: "release"
+--passC: "-flto"
+--passL: "-flto"

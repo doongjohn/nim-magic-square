@@ -10,6 +10,10 @@ proc newAscendingSeq(len: int): seq[int] =
     n = i
 
 
+template calcMagicSum*(size: SomeInteger): SomeInteger =
+  (size * (size ^ 2 + 1)) div 2
+
+
 proc gen3x3(seed: int): seq[seq[int]] =
   var arr = [1, 6, 7, 2, 9, 4, 3, 8]
   if (seed div 8) mod 2 == 1:
@@ -24,8 +28,8 @@ proc gen3x3(seed: int): seq[seq[int]] =
 
 
 proc gen4x4(seed: int): seq[seq[int]] =
-  const max = 16
-  const sum = 34
+  const max = int16(4 ^ 4)
+  const sum = calcMagicSum 4.int16
   var count = 0
   var n: array[16, int16]
   var used: set[int16]
@@ -37,6 +41,8 @@ proc gen4x4(seed: int): seq[seq[int]] =
   template isValid(num: int16): bool =
     num notin 1 .. max or num in used
 
+  # TODO: why is this so slow?
+  echo "start generating"
   n[5] = 0
   while n[5] <= max:
     n[5] += 1
@@ -115,6 +121,7 @@ proc gen4x4(seed: int): seq[seq[int]] =
 
                 # return result
                 if seed mod 7040 == count:
+                  echo count
                   result = newSeq[seq[int]](4)
                   for y, row in result.mpairs:
                     row = newSeq[int](4)
