@@ -42,6 +42,7 @@ proc gen4x4(seed: int): seq[seq[int]] =
     num notin 1 .. max or num in used
 
   # TODO: why is this so slow?
+  # this commit was fast: 511dcd8b16374cd7fede946a41a94b7d33ab373f
   echo "start generating"
   n[5] = 0
   while n[5] <= max:
