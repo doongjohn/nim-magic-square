@@ -2,7 +2,7 @@
 
 Magic square game written in nim
 
-![image](https://user-images.githubusercontent.com/40219740/143672023-f199d584-a5bb-4124-abb6-0ad178a9b44a.png)
+![image](https://user-images.githubusercontent.com/40219740/144696626-4d511bce-45d2-4701-9cb4-b28e1d8b9c37.png)
 
 ## Rules
 
@@ -17,6 +17,8 @@ Magic square game written in nim
 restart game
 - **`Arrow Keys` or `LMB`:**\
 select a grid cell
+- **`Tab`**\
+select next cell
 - **`Numpad Keys`:**\
 write number
 - **`Backspace`:**\
