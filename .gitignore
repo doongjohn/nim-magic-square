@@ -1,6 +1,7 @@
 nimcache/
 nimblecache/
 htmldocs/
+magic square*
 *.exe
 *.out
 
