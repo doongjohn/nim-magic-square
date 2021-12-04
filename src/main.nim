@@ -10,7 +10,7 @@
 # - [x] create square of any size
 # - [x] display duplicate error
 # - [x] evaluate magic square
-# - [ ] auto generate hint
+# - [x] auto generate hint
 # - [ ] display sum
 # - [ ] display help
 

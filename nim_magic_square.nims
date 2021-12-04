@@ -1,4 +1,6 @@
 --gc: "orc"
+--opt: "speed"
+--panics: "on"
 --define: "release"
 --passC: "-flto"
 --passL: "-flto"

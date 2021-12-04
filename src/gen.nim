@@ -28,7 +28,7 @@ proc gen3x3(seed: int): seq[seq[int]] =
 
 
 proc gen4x4(seed: int): seq[seq[int]] =
-  const max = int16(4 ^ 4)
+  const max = (4 ^ 4).int16
   const sum = calcMagicSum 4.int16
   var count = 0
   var n: array[16, int16]
@@ -46,18 +46,18 @@ proc gen4x4(seed: int): seq[seq[int]] =
   echo "start generating"
   n[5] = 0
   while n[5] <= max:
-    n[5] += 1
+    inc n[5]
     use n[5]
 
     n[6] = 0
     while n[6] <= max:
-      n[6] += 1
+      inc n[6]
       if n[6] == n[5]: continue
       use n[6]
 
       n[9] = 0
       while n[9] <= max:
-        n[9] += 1
+        inc n[9]
         if n[9] in used: continue
         use n[9]
 
@@ -67,7 +67,7 @@ proc gen4x4(seed: int): seq[seq[int]] =
 
         n[0] = 0
         while n[0] <= max:
-          n[0] += 1
+          inc n[0]
           if n[0] in used: continue
           use n[0]
 
@@ -77,7 +77,7 @@ proc gen4x4(seed: int): seq[seq[int]] =
 
           n[12] = 0
           while n[12] <= max:
-            n[12] += 1
+            inc n[12]
             if n[12] in used: continue
             use n[12]
 
@@ -87,7 +87,7 @@ proc gen4x4(seed: int): seq[seq[int]] =
 
             n[1] = 0
             while n[1] <= max:
-              n[1] += 1
+              inc n[1]
               if n[1] in used: continue
               use n[1]
 
@@ -105,7 +105,7 @@ proc gen4x4(seed: int): seq[seq[int]] =
 
               n[4] = 0
               while n[4] <= max:
-                n[4] += 1
+                inc n[4]
                 if n[4] in used: continue
                 use n[4]
 
@@ -130,7 +130,7 @@ proc gen4x4(seed: int): seq[seq[int]] =
                       i = n[y * 4  + x]
                   return
 
-                count += 1
+                inc count
 
 
 proc genMagicSquare*(grid: Grid, seed: int): seq[seq[int]] =
