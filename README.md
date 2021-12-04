@@ -13,15 +13,15 @@ Magic square game written in nim
 
 ## Controls
 
-- **`R`:**\
+- **`R`**\
 restart game
-- **`Arrow Keys` or `LMB`:**\
+- **`Arrow Keys` or `LMB`**\
 select a grid cell
 - **`Tab`**\
 select next cell
-- **`Numpad Keys`:**\
+- **`Numpad Keys`**\
 write number
-- **`Backspace`:**\
+- **`Backspace`**\
 erase number
-- **`Enter`:**\
+- **`Enter`**\
 confirm number
