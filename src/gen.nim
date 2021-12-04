@@ -28,7 +28,7 @@ proc gen3x3(seed: int): seq[seq[int]] =
 
 
 proc gen4x4(seed: int): seq[seq[int]] =
-  const max = (4 ^ 4).int16
+  const max = (4 * 4).int16
   const sum = calcMagicSum 4.int16
   var count = 0
   var n: array[16, int16]
@@ -41,9 +41,6 @@ proc gen4x4(seed: int): seq[seq[int]] =
   template isValid(num: int16): bool =
     num notin 1 .. max or num in used
 
-  # TODO: why is this so slow?
-  # this commit was fast: 511dcd8b16374cd7fede946a41a94b7d33ab373f
-  echo "start generating"
   n[5] = 0
   while n[5] <= max:
     inc n[5]
@@ -122,7 +119,6 @@ proc gen4x4(seed: int): seq[seq[int]] =
 
                 # return result
                 if seed mod 7040 == count:
-                  echo count
                   result = newSeq[seq[int]](4)
                   for y, row in result.mpairs:
                     row = newSeq[int](4)
