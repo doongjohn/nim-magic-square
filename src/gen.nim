@@ -1,6 +1,8 @@
 import std/math
 import std/random
 import std/algorithm
+import std/strutils
+import std/strformat
 import grids
 
 
@@ -119,6 +121,13 @@ proc gen4x4(seed: int): seq[seq[int]] =
 
                 # return result
                 if seed mod 7040 == count:
+                  echo """
+                  : {count}
+                  | {n[00]:>2} {n[01]:>2} {n[02]:>2} {n[03]:>2} |
+                  | {n[04]:>2} {n[05]:>2} {n[06]:>2} {n[07]:>2} |
+                  | {n[08]:>2} {n[09]:>2} {n[10]:>2} {n[11]:>2} |
+                  | {n[12]:>2} {n[13]:>2} {n[14]:>2} {n[15]:>2} |
+                  """.fmt.unindent
                   result = newSeq[seq[int]](4)
                   for y, row in result.mpairs:
                     row = newSeq[int](4)
