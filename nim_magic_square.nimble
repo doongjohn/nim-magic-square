@@ -5,7 +5,7 @@ author        = "doongjohn"
 description   = "magic square game"
 license       = "MIT"
 srcDir        = "src"
-namedBin["main"] = "magic square"
+namedBin["main"] = "magic_square"
 
 
 # Dependencies

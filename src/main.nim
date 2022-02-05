@@ -73,6 +73,9 @@ proc updateInput =
     selected.dup = nil
 
 
+# initalize glfw
+initGlfw()
+
 # mouse input logic
 window.onMouseButton:
   if gameEnded:

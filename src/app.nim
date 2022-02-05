@@ -11,14 +11,15 @@ var ctx* = newContext(screenSize.w, screenSize.h)
 var window*: Window
 
 
-# init glfw
-if init() == 1:
-  windowHint(RESIZABLE, false.cint)
-  window = createWindow(screenSize.w.cint, screenSize.h.cint, "Magic square", nil, nil)
-  window.makeContextCurrent()
-  loadExtensions()
-else:
-  quit("Failed to Initialize GLFW.")
+template initGlfw* =
+  # init glfw
+  if init() == 1:
+    windowHint(RESIZABLE, false.cint)
+    window = createWindow(screenSize.w.cint, screenSize.h.cint, "Magic square", nil, nil)
+    window.makeContextCurrent()
+    loadExtensions()
+  else:
+    quit("Failed to Initialize GLFW.")
 
 
 template mainLoop*(body: typed) =
@@ -37,7 +38,6 @@ template mainLoop*(body: typed) =
     body
 
     # update texture with new pixels from surface
-    var dataPtr = ctx.image.data[0].addr
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GLsizei screenSize.w, GLsizei screenSize.h, GL_RGBA, GL_UNSIGNED_BYTE, dataPtr)
 
     # draw a quad over the whole screen
