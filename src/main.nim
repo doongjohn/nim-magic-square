@@ -173,7 +173,7 @@ window.onKeyboard:
 # font settings
 ctx.font = "C:/Windows/Fonts/consola.ttf"
 ctx.fontSize = 30
-ctx.textAlign = haCenter
+ctx.textAlign = CenterAlign
 
 
 # main loop
